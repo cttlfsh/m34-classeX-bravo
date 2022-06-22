@@ -13,9 +13,9 @@ public class TowerManager : MonoBehaviour
 
 
     [Header("Tower Prefabs")]
-    public List<GameObject> towerPrefabs = new List<GameObject>();
     public GameObject firstTowerBase;
     public GameObject secondTowerBase;
+    public GameObject towerFloorPrefab;
     public GameObject towerTop;
     [Space]
     [SerializeField] private Vector3 spawnOffset;
@@ -43,22 +43,30 @@ public class TowerManager : MonoBehaviour
     /// <param name="nickname"> The nickname of the Twitch user to add</param>
     public void JoinGame(string nickname)
     {
-
-        int towerIndex = SortPlayerInTowers();
-        if (towerIndex == 0)
+        if (!CheckPlayerNickname(nickname))
         {
-            firstTowerPlayerNicknames.Add(nickname);
-            Debug.Log($"Player: {nickname} joined on the FIRST tower");
+            int towerIndex = SortPlayerInTowers();
+            if (towerIndex == 0)
+            {
+                firstTowerPlayerNicknames.Add(nickname);
+                Debug.Log($"Player: {nickname} joined on the FIRST tower");
+                GameManager.Instance.playerInGame += 1;
 
-        }
-        else if (towerIndex == 1)
-        {
-            secondTowerPlayerNicknames.Add(nickname);
-            Debug.Log($"Player: {nickname} joined on the SECOND tower");
+            }
+            else if (towerIndex == 1)
+            {
+                secondTowerPlayerNicknames.Add(nickname);
+                Debug.Log($"Player: {nickname} joined on the SECOND tower");
+                GameManager.Instance.playerInGame += 1;
+            }
+            else
+            {
+                Debug.Log("Player cap reached");
+            }
         }
         else
         {
-            Debug.Log("Player cap reached");
+            Debug.Log($"Player {nickname} has already joined the match");
         }
     }
 
@@ -78,6 +86,7 @@ public class TowerManager : MonoBehaviour
             {
                 floor.Move = move;
                 Debug.Log($"Player {nickname} selected {RockPaperScissor.moves[move]} magic");
+                return;
             }
         }
 
@@ -87,6 +96,7 @@ public class TowerManager : MonoBehaviour
             {
                 floor.Move = move;
                 Debug.Log($"Player {nickname} selected {RockPaperScissor.moves[move]} magic");
+                return;
             }
         }
     }
@@ -121,9 +131,9 @@ public class TowerManager : MonoBehaviour
     /// <returns>the index of the tower, -1 if the player cap has already been reached in both</returns>
     private int SortPlayerInTowers()
     {
-        if (firstTowerFloors.Count == towerHeight)
+        if (firstTowerPlayerNicknames.Count == towerHeight)
         {
-            if (secondTowerFloors.Count == towerHeight)
+            if (secondTowerPlayerNicknames.Count == towerHeight)
             {
                 return -1;
             }
@@ -131,12 +141,36 @@ public class TowerManager : MonoBehaviour
         }
         else
         {
-            if (secondTowerFloors.Count == towerHeight)
+            if (secondTowerPlayerNicknames.Count == towerHeight)
             {
                 return 0;
             }
         }
         return Random.Range(0, 2);
+    }
+
+    /// <summary>
+    /// Methods which checks if a player has already joined the match based on its nickname
+    /// </summary>
+    /// <param name="nickname">Nickname of the player to check</param>
+    /// <returns>Returns TRUE if the player has already joined, false otherwise</returns>
+    private bool CheckPlayerNickname(string nickname)
+    {
+        foreach (string ncknm in firstTowerPlayerNicknames)
+        { 
+            if (ncknm == nickname)
+            {
+                return true;
+            }
+        }
+        foreach (string ncknm in secondTowerPlayerNicknames)
+        {
+            if (ncknm == nickname)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /// <summary>
@@ -150,7 +184,7 @@ public class TowerManager : MonoBehaviour
     /// <param name="towerIndex">Index of the tower to generate</param>
     private void GenerateTower(GameObject towerSpawn, List<Floor> towerToGenerate, List<string> nicknameList, int towerIndex)
     {
-        GameObject baseFloor = Instantiate(towerPrefabs[Random.Range(0, towerPrefabs.Count)], towerSpawn.transform.position + spawnOffset, Quaternion.identity);
+        GameObject baseFloor = Instantiate(towerFloorPrefab, towerSpawn.transform.position + spawnOffset, Quaternion.identity);
         baseFloor.transform.parent = towerSpawn.transform;
         Floor baseFloorBehaviour = baseFloor.GetComponent<Floor>();
         baseFloorBehaviour.towerIndex = towerIndex;
@@ -159,11 +193,11 @@ public class TowerManager : MonoBehaviour
 
         for (int i = 1; i < nicknameList.Count; i++)
         {
-            GameObject floor = Instantiate(towerPrefabs[Random.Range(0, towerPrefabs.Count)], towerToGenerate[i - 1].gameObject.transform.position + spawnOffset, Quaternion.identity);
+            GameObject floor = Instantiate(towerFloorPrefab, towerToGenerate[i - 1].gameObject.transform.position + spawnOffset, Quaternion.identity);
             floor.transform.parent = towerSpawn.transform;
             Floor floorBehaviour = floor.GetComponent<Floor>();
             floorBehaviour.towerIndex = towerIndex;
-            floorBehaviour.PlayerNickname = nicknameList[1];
+            floorBehaviour.PlayerNickname = nicknameList[i];
             towerToGenerate.Add(floorBehaviour);
         }
 
@@ -279,9 +313,11 @@ public class TowerManager : MonoBehaviour
         {
             if (GameManager.Instance.gamePhase == "Lobby")
             {
-                for (int i = 0; i < towerHeight * 2; i++)
+                int npcToAdd = towerHeight * 2 - GameManager.Instance.playerInGame;
+                Debug.Log($"NPC to add: {npcToAdd}");
+                for (int i = 0; i < npcToAdd; i++)
                 {
-                    JoinGame("test");
+                    JoinGame($"test{i}");
                 }
                 GameManager.Instance.gamePhase = "PowerSelection";
                 Debug.Log(firstTowerPlayerNicknames.Count);
@@ -292,18 +328,25 @@ public class TowerManager : MonoBehaviour
         {
             foreach (Floor floor in firstTowerFloors)
             {
-                floor.Move = Random.Range(0, 3);
+                if (floor.isNPC)
+                {
+                    floor.Move = Random.Range(0, 3);
+
+                }
             }
             foreach (Floor floor in secondTowerFloors)
             {
-                floor.Move = Random.Range(0, 3);
+                if (floor.isNPC)
+                {
+                    floor.Move = Random.Range(0, 3);
+                }
             }
             GameManager.Instance.gamePhase = "GameReady";
         }
         if (Input.GetKeyDown(KeyCode.G) && GameManager.Instance.gamePhase == "PowerSelection")
         {
             GenerateTower(firstTowerBase, firstTowerFloors, firstTowerPlayerNicknames, 0);
-            GenerateTower(secondTowerBase, secondTowerFloors, firstTowerPlayerNicknames, 1);
+            GenerateTower(secondTowerBase, secondTowerFloors, secondTowerPlayerNicknames, 1);
             GameManager.Instance.gamePhase = "GameReady";
         }
         if (Input.GetKeyDown(KeyCode.P) && GameManager.Instance.gamePhase == "GameReady")

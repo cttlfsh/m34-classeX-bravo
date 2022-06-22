@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     public string gamePhase;
+    public int playerInGame;
 
     #region PUBLIC_METHODS
     public void TwitchInputHandler(MessageData messageData)
