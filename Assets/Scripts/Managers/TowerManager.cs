@@ -188,6 +188,10 @@ public class TowerManager : MonoBehaviour
         baseFloor.transform.parent = towerSpawn.transform;
         Floor baseFloorBehaviour = baseFloor.GetComponent<Floor>();
         baseFloorBehaviour.towerIndex = towerIndex;
+        if (nicknameList[0].StartsWith("test"))
+        {
+            baseFloorBehaviour.isNPC = true;
+        }
         baseFloorBehaviour.PlayerNickname = nicknameList[0];
         towerToGenerate.Add(baseFloorBehaviour);
 
@@ -197,6 +201,10 @@ public class TowerManager : MonoBehaviour
             floor.transform.parent = towerSpawn.transform;
             Floor floorBehaviour = floor.GetComponent<Floor>();
             floorBehaviour.towerIndex = towerIndex;
+            if (nicknameList[i].StartsWith("test"))
+            {
+                floorBehaviour.isNPC = true;
+            }
             floorBehaviour.PlayerNickname = nicknameList[i];
             towerToGenerate.Add(floorBehaviour);
         }
