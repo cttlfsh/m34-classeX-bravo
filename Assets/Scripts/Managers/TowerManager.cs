@@ -17,6 +17,7 @@ public class TowerManager : MonoBehaviour
     public GameObject firstTowerBase;
     public GameObject secondTowerBase;
     public GameObject towerTop;
+    public GameObject topFloorInstance;
     [Space]
     [SerializeField] private Vector3 spawnOffset;
 
@@ -167,8 +168,16 @@ public class TowerManager : MonoBehaviour
             towerToGenerate.Add(floorBehaviour);
         }
 
-        GameObject topFloor = Instantiate(towerTop, towerToGenerate[towerToGenerate.Count - 1].gameObject.transform.position + spawnOffset, Quaternion.identity);
-        topFloor.transform.parent = towerSpawn.transform;
+        topFloorInstance = Instantiate(towerTop, towerToGenerate[towerToGenerate.Count - 1].gameObject.transform.position + spawnOffset, Quaternion.identity);
+        topFloorInstance.transform.parent = towerSpawn.transform;
+
+        
+            CameraManager.Instance.dollyCamera.gameObject.SetActive(true);
+            CameraManager.Instance.dollyTrack.GetComponent<Cinemachine.CinemachineSmoothPath>().m_Waypoints[1].position.y = firstTowerFloors[firstTowerFloors.Count - 13].gameObject.transform.position.y;
+            CameraManager.Instance.dollyCart.GetComponent<Cinemachine.CinemachineDollyCart>().m_Position = 0;
+        
+
+        
     }
 
     #region GAME_READY_METHODS
@@ -310,6 +319,17 @@ public class TowerManager : MonoBehaviour
         {
             // rigioca la partita solo con i piani che hanno un nemico
             Play();
+        }
+        /*if(Input.GetKeyDown(KeyCode.Space))
+        {
+            CameraManager.Instance.dollyCamera.gameObject.SetActive(true);
+            CameraManager.Instance.dollyTrack.GetComponent<Cinemachine.CinemachineSmoothPath>().m_Waypoints[1].position.y = firstTowerFloors[firstTowerFloors.Count - 13].gameObject.transform.position.y;
+            CameraManager.Instance.dollyCart.GetComponent<Cinemachine.CinemachineDollyCart>().m_Position = 0;
+        }*/
+
+        if (CameraManager.Instance.dollyCart.GetComponent<Cinemachine.CinemachineDollyCart>().m_Position == CameraManager.Instance.dollyTrack.GetComponent<Cinemachine.CinemachineSmoothPath>().PathLength)
+        {
+            CameraManager.Instance.dollyCamera.gameObject.SetActive(false);
         }
     }
     #endregion

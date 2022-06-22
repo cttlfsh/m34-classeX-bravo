@@ -99,6 +99,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7326b6b4994ebe84c89131da276f61f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isInvincible: 0
+  adiacentFloors: []
   towerIndex: 0
 --- !u!54 &6148529151246902660
 Rigidbody:
@@ -140,5 +142,5 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 13.150978, y: 7.827078, z: 14.10784}
-  m_Center: {x: -0.0119895935, y: 3.913539, z: 17.89376}
+  m_Size: {x: 21.37532, y: 7.827078, z: 22.441046}
+  m_Center: {x: 4.1001835, y: 3.913539, z: 4.6073446}

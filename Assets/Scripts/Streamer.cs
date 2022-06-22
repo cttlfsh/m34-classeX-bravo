@@ -60,6 +60,11 @@ public class Streamer : MonoBehaviour
             selectedModifierIndex = 0;
             GetCurrentModifier(selectedModifierIndex);
         }
+        if (Input.GetKeyDown(KeyCode.Keypad2))
+        {
+            selectedModifierIndex = 1;
+            GetCurrentModifier(selectedModifierIndex);
+        }
         if (Input.GetKeyDown(KeyCode.T))
         {
             if(isNearFloor)
