@@ -17,6 +17,7 @@ public class TowerManager : MonoBehaviour
     public GameObject secondTowerBase;
     public GameObject towerFloorPrefab;
     public GameObject towerTop;
+    public GameObject fracturedFloor;
     [Space]
     [SerializeField] private Vector3 spawnOffset;
 
@@ -184,7 +185,16 @@ public class TowerManager : MonoBehaviour
     /// <param name="towerIndex">Index of the tower to generate</param>
     private void GenerateTower(GameObject towerSpawn, List<Floor> towerToGenerate, List<string> nicknameList, int towerIndex)
     {
-        GameObject baseFloor = Instantiate(towerFloorPrefab, towerSpawn.transform.position + spawnOffset, Quaternion.identity);
+        Quaternion floorOrientation;
+        if (towerIndex == 0)
+        {
+            floorOrientation = Quaternion.Euler(0, -90, 0);
+        }
+        else
+        {
+            floorOrientation = Quaternion.Euler(0, 90, 0);
+        }
+        GameObject baseFloor = Instantiate(towerFloorPrefab, towerSpawn.transform.position + spawnOffset, floorOrientation);
         baseFloor.transform.parent = towerSpawn.transform;
         Floor baseFloorBehaviour = baseFloor.GetComponent<Floor>();
         baseFloorBehaviour.towerIndex = towerIndex;
@@ -197,7 +207,7 @@ public class TowerManager : MonoBehaviour
 
         for (int i = 1; i < nicknameList.Count; i++)
         {
-            GameObject floor = Instantiate(towerFloorPrefab, towerToGenerate[i - 1].gameObject.transform.position + spawnOffset, Quaternion.identity);
+            GameObject floor = Instantiate(towerFloorPrefab, towerToGenerate[i - 1].gameObject.transform.position + spawnOffset, floorOrientation);
             floor.transform.parent = towerSpawn.transform;
             Floor floorBehaviour = floor.GetComponent<Floor>();
             floorBehaviour.towerIndex = towerIndex;
@@ -257,6 +267,7 @@ public class TowerManager : MonoBehaviour
             }
 
         }
+        
         // distruggi i perdenti
         Debug.Log($"FIRST TOWER LOSERS COUNT: {firstTowerLosers.Count}");
         List<Floor> firstTMP = firstTowerFloors.Except(firstTowerLosers).ToList();
@@ -276,6 +287,7 @@ public class TowerManager : MonoBehaviour
     {
         for (int i = 0; i < losers.Count; i++)
         {
+            GameObject floorToFracture = Instantiate(fracturedFloor, losers[i].transform.position, losers[i].transform.rotation);
             Destroy(losers[i].gameObject);
         }
     }

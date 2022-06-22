@@ -12,6 +12,8 @@ public class Floor : MonoBehaviour
     public int Points { get; set; }
     public bool isNPC { get; set; }
 
+    public Wizard wizard;
+
     [Range(0, 1)] public int towerIndex;
 
     private Rigidbody rb;
