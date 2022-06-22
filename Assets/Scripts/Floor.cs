@@ -21,7 +21,7 @@ public class Floor : MonoBehaviour
     private void Awake()
     {
         SetupRigidbodyParameters();
-        isNPC = true;
+        isNPC = false;
     }
 
     private void SetupRigidbodyParameters()
