@@ -12,6 +12,7 @@ public class TowerManager : MonoBehaviour
     public float singleMatchTime;
     [Header("Tower Information")]
     public int towerHeight;
+    public GameObject floorExplosionVFX;
 
     [Header("Tower Prefabs")]
     public GameObject firstTowerBase;
@@ -336,12 +337,14 @@ public class TowerManager : MonoBehaviour
         if (towerIndex == 0)
         {
             GameObject floorToFracture = Instantiate(fracturedFloor, firstTowerFloors[floorIndex].transform.position, firstTowerFloors[floorIndex].transform.rotation);
+            Instantiate(floorExplosionVFX, firstTowerFloors[floorIndex].transform.position, floorExplosionVFX.transform.rotation);
             Destroy(firstTowerFloors[floorIndex].gameObject);
             firstTowerFloors.RemoveAt(floorIndex);
         }
         else
         {
             GameObject floorToFracture = Instantiate(fracturedFloor, secondTowerFloors[floorIndex].transform.position, secondTowerFloors[floorIndex].transform.rotation);
+            Instantiate(floorExplosionVFX, secondTowerFloors[floorIndex].transform.position, floorExplosionVFX.transform.rotation);
             Destroy(secondTowerFloors[floorIndex].gameObject);
             secondTowerFloors.RemoveAt(floorIndex);
         }
