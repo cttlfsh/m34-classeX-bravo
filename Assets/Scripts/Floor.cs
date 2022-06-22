@@ -7,6 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class Floor : MonoBehaviour
 {
+    public List<GameObject> spellVFXPool = new List<GameObject>();
     public string PlayerNickname { get; set; }
     public int Move { get; set; }
     public int Points { get; set; }
