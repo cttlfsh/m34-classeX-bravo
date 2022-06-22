@@ -18,6 +18,10 @@ public class Floor : MonoBehaviour
 
     private Rigidbody rb;
 
+    public void StartWizardAnimation()
+    {
+        wizard.wizardAnimator.SetTrigger("StartWalking");
+    }
 
     #region UNITY_METHODS
     private void Awake()

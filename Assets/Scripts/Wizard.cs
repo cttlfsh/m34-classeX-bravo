@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Wizard : MonoBehaviour
 {
-    Animator wizardAnimator;
+    public Animator wizardAnimator;
 
     private void Awake()
     {

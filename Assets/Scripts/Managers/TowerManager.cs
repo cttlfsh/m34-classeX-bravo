@@ -8,9 +8,10 @@ public class TowerManager : MonoBehaviour
     #region VARIABLES
     public static TowerManager Instance;
 
-
+    [Header("General Information")]
+    public float singleMatchTime;
+    [Header("Tower Information")]
     public int towerHeight;
-
 
     [Header("Tower Prefabs")]
     public GameObject firstTowerBase;
@@ -26,7 +27,7 @@ public class TowerManager : MonoBehaviour
     private List<string> firstTowerPlayerNicknames = new List<string>();
     private List<string> secondTowerPlayerNicknames = new List<string>();
     private bool isGameOver;
-    private int roundsToPlay;
+    private int currentRoundToPlay;
 
     #endregion
 
@@ -227,14 +228,15 @@ public class TowerManager : MonoBehaviour
     /// <summary>
     /// Method which prepare the conditions to play the round, checking how many matches there will be to play
     /// </summary>
-    private void SetupRound()
+    private int SetupRound()
     {
         Debug.Log($"Number of rounds to play: {Mathf.Min(firstTowerFloors.Count, secondTowerFloors.Count)}");
-        roundsToPlay = Mathf.Min(firstTowerFloors.Count, secondTowerFloors.Count);
+        currentRoundToPlay = Mathf.Min(firstTowerFloors.Count, secondTowerFloors.Count) -1;
+        return currentRoundToPlay;
     }
 
     /// <summary>
-    /// Method which plays a round of matches between the two tower. It computes how many 
+    /// (DEPRECATED) Method which plays a round of matches between the two tower. It computes how many 
     /// matches it has to simulate depending of the lenght of the smallest tower and
     /// starts the RPS game for each of this matches.
     /// Finally it updates the scores of the winner/draw players and deletes the losers
@@ -245,7 +247,7 @@ public class TowerManager : MonoBehaviour
         List<Floor> firstTowerLosers = new List<Floor>();
         List<Floor> secondTowerLosers = new List<Floor>();
         // lancia una partita per ogni coppia di piani
-        for (int i = 0; i < roundsToPlay; i++)
+        for (int i = 0; i < currentRoundToPlay; i++)
         {
             // ricevi i vincitori come interi
             Debug.Log($"MATCH STARTING: Tower 0 (Floor {i}, Move {firstTowerFloors[i].Move})  vs Tower 1 (Floor {i}, Move {secondTowerFloors[i].Move})");
@@ -280,6 +282,40 @@ public class TowerManager : MonoBehaviour
     }
 
     /// <summary>
+    /// IMPORTANT! The floor list MUST be traversed from top to bottom otherwise ISSUES WITH LISTS REMOVE
+    /// </summary>
+    /// <param name="floorIndex"></param>
+    private void PlayMatch(int floorIndex)
+    {
+        Debug.Log($"MATCH STARTING - Floor {floorIndex}");
+        print($"Tower 0 (Move {firstTowerFloors[floorIndex].Move})  vs Tower 1 (Floor {floorIndex}, Move {secondTowerFloors[floorIndex].Move})");
+        Floor firstTowerFloor = firstTowerFloors[floorIndex];
+        Floor secondTowerFloor = secondTowerFloors[floorIndex];
+        firstTowerFloor.StartWizardAnimation();
+        secondTowerFloor.StartWizardAnimation();
+        int winnerTower = RockPaperScissor.PlayRPSTurn(firstTowerFloors[floorIndex].Move, secondTowerFloors[floorIndex].Move);
+        int loserTower = 0;
+        if (winnerTower == 0)
+        {
+            // assegnare al vfx towerIndex = 1 e corretto floorIndex
+            firstTowerFloors[floorIndex].Points += 3;
+            loserTower = 1;
+        }
+        else if (winnerTower == 1)
+        {
+            // assegnare al vfx towerIndex = 1 e corretto floorIndex
+            secondTowerFloors[floorIndex].Points += 3;
+            loserTower = 0;
+        }
+        else
+        {
+            firstTowerFloors[floorIndex].Points += 1;
+            secondTowerFloors[floorIndex].Points += 1;
+            loserTower = -1;
+        }
+        StartCoroutine(NextRound(singleMatchTime, loserTower, floorIndex));
+    }
+    /// <summary>
     /// Helper method which destroys the loser floors at each round for a specified tower
     /// </summary>
     /// <param name="losers">The tower where to delete the losers</param>
@@ -289,6 +325,25 @@ public class TowerManager : MonoBehaviour
         {
             GameObject floorToFracture = Instantiate(fracturedFloor, losers[i].transform.position, losers[i].transform.rotation);
             Destroy(losers[i].gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Method triggered by the spell VFX when it hits the other Tower
+    /// </summary>
+    public void DestroyLoser(int towerIndex, int floorIndex)
+    {
+        if (towerIndex == 0)
+        {
+            GameObject floorToFracture = Instantiate(fracturedFloor, firstTowerFloors[floorIndex].transform.position, firstTowerFloors[floorIndex].transform.rotation);
+            Destroy(firstTowerFloors[floorIndex].gameObject);
+            firstTowerFloors.RemoveAt(floorIndex);
+        }
+        else
+        {
+            GameObject floorToFracture = Instantiate(fracturedFloor, secondTowerFloors[floorIndex].transform.position, secondTowerFloors[floorIndex].transform.rotation);
+            Destroy(secondTowerFloors[floorIndex].gameObject);
+            secondTowerFloors.RemoveAt(floorIndex);
         }
     }
 
@@ -312,6 +367,20 @@ public class TowerManager : MonoBehaviour
     }
     #endregion
     #endregion
+
+    private IEnumerator NextRound(float singleMatchTime, int loserTower, int loserFloor)
+    {
+        yield return new WaitForSeconds(singleMatchTime);
+        if (loserTower != -1)
+        {
+            DestroyLoser(loserTower, loserFloor);
+        }
+        currentRoundToPlay -= 1;
+        if (currentRoundToPlay >= 0)
+        {
+            PlayMatch(currentRoundToPlay);
+        }
+    }
 
     #region UNITY_METHODS
 
@@ -372,7 +441,9 @@ public class TowerManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P) && GameManager.Instance.gamePhase == "GameReady")
         {
             // rigioca la partita solo con i piani che hanno un nemico
-            Play();
+            int firstRoundToPlay = SetupRound();
+            PlayMatch(firstRoundToPlay);
+            //Play();
         }
     }
     #endregion
