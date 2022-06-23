@@ -19,14 +19,14 @@ public class Streamer : MonoBehaviour
     public void GetCurrentModifier(int modifierIndex)
     {
         currentModifier = modifiersPool[modifierIndex].GetComponent<IIModifiers>();
-        print($"Current modifier is {modifiersPool[modifierIndex].GetComponent<IIModifiers>()}");
+        Debug.Log($"Current modifier is {modifiersPool[modifierIndex].GetComponent<IIModifiers>()}");
     }
 
     private void OnTriggerEnter(Collider other)
     {
         isNearFloor = true;
-        print($"Collided with {other.gameObject.name}");
-        print(currentModifier);
+        Debug.Log($"Collided with {other.gameObject.name}");
+        Debug.Log(currentModifier);
         currentSelectedFloorInstance = other.GetComponent<Floor>();
     }
 
@@ -44,13 +44,13 @@ public class Streamer : MonoBehaviour
     {
         
         Vector3 finalMovement = new Vector3(Input.GetAxis("Horizontal")*-1, Input.GetAxis("Vertical"), 0f).normalized;
-        float turnSmoothVelocity = 0f;
+        //float turnSmoothVelocity = 0f;
 
-        if (finalMovement.magnitude >= 0.1f)
+        if (finalMovement.magnitude >= 0.1f && !CameraManager.Instance.isCinematicPlaying)
         {
-            float targetAngle = Mathf.Atan2(finalMovement.x*-1, finalMovement.y) * Mathf.Rad2Deg;
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.z, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-            transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            //float targetAngle = Mathf.Atan2(finalMovement.x*-1, finalMovement.y) * Mathf.Rad2Deg;
+            //float angle = Mathf.SmoothDampAngle(transform.eulerAngles.z, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             cc.Move(finalMovement * speed * Time.deltaTime);
 
         }
@@ -71,12 +71,12 @@ public class Streamer : MonoBehaviour
             {
                 if (currentModifier != null)
                 {
-                    print("prova");
+                    Debug.Log("prova");
                     currentModifier.ApplyEffect(currentSelectedFloorInstance);
                     currentModifier = null;
                 } else
                 {
-                    print("First select a modifier to apply");
+                    Debug.Log("First select a modifier to apply");
                 }
             }
         }

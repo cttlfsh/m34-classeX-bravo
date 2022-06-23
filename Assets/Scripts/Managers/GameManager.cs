@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-
+    public Streamer streamer;
     public string gamePhase;
 
     #region PUBLIC_METHODS

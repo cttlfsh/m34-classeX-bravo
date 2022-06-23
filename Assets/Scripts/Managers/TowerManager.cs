@@ -2,6 +2,7 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class TowerManager : MonoBehaviour
 {
@@ -27,6 +28,8 @@ public class TowerManager : MonoBehaviour
     private List<string> secondTowerPlayerNicknames = new List<string>();
     private bool isGameOver;
     private int roundsToPlay;
+    private CinemachineDollyCart dollyCart;
+    private CinemachineSmoothPath dollyTrackPath;
 
     #endregion
 
@@ -172,12 +175,10 @@ public class TowerManager : MonoBehaviour
         topFloorInstance.transform.parent = towerSpawn.transform;
 
         
-            CameraManager.Instance.dollyCamera.gameObject.SetActive(true);
-            CameraManager.Instance.dollyTrack.GetComponent<Cinemachine.CinemachineSmoothPath>().m_Waypoints[1].position.y = firstTowerFloors[firstTowerFloors.Count - 13].gameObject.transform.position.y;
-            CameraManager.Instance.dollyCart.GetComponent<Cinemachine.CinemachineDollyCart>().m_Position = 0;
-        
-
-        
+        CameraManager.Instance.dollyCamera.gameObject.SetActive(true);
+        dollyTrackPath.m_Waypoints[1].position.y = firstTowerFloors[firstTowerFloors.Count - 13].gameObject.transform.position.y;
+        dollyCart.m_Position = 0;
+        CameraManager.Instance.isCinematicPlaying = true;
     }
 
     #region GAME_READY_METHODS
@@ -270,6 +271,12 @@ public class TowerManager : MonoBehaviour
 
     #region UNITY_METHODS
 
+    private void Start()
+    {
+        dollyCart = CameraManager.Instance.dollyCart.GetComponent<Cinemachine.CinemachineDollyCart>();
+        dollyTrackPath = CameraManager.Instance.dollyTrack.GetComponent<Cinemachine.CinemachineSmoothPath>();
+    }
+
     private void Awake()
     {
         #region SINGLETON
@@ -315,21 +322,18 @@ public class TowerManager : MonoBehaviour
             GenerateTower(secondTowerBase, secondTowerFloors, firstTowerPlayerNicknames, 1);
             GameManager.Instance.gamePhase = "GameReady";
         }
+
         if (Input.GetKeyDown(KeyCode.P) && GameManager.Instance.gamePhase == "GameReady")
         {
             // rigioca la partita solo con i piani che hanno un nemico
             Play();
         }
-        /*if(Input.GetKeyDown(KeyCode.Space))
-        {
-            CameraManager.Instance.dollyCamera.gameObject.SetActive(true);
-            CameraManager.Instance.dollyTrack.GetComponent<Cinemachine.CinemachineSmoothPath>().m_Waypoints[1].position.y = firstTowerFloors[firstTowerFloors.Count - 13].gameObject.transform.position.y;
-            CameraManager.Instance.dollyCart.GetComponent<Cinemachine.CinemachineDollyCart>().m_Position = 0;
-        }*/
 
-        if (CameraManager.Instance.dollyCart.GetComponent<Cinemachine.CinemachineDollyCart>().m_Position == CameraManager.Instance.dollyTrack.GetComponent<Cinemachine.CinemachineSmoothPath>().PathLength)
+        if (dollyCart.m_Position == dollyTrackPath.PathLength)
         {
+            GameManager.Instance.streamer.gameObject.SetActive(true);
             CameraManager.Instance.dollyCamera.gameObject.SetActive(false);
+            CameraManager.Instance.isCinematicPlaying = false;
         }
     }
     #endregion

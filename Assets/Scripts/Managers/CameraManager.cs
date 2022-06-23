@@ -9,6 +9,7 @@ public class CameraManager : MonoBehaviour
     public GameObject dollyCart;
     public GameObject mainCamera;
     public Transform dollyCamera;
+    public bool isCinematicPlaying;
 
     private void Awake()
     {
